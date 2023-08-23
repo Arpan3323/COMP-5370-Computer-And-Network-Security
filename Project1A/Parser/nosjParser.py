@@ -7,9 +7,10 @@ import sys
 
 def readFile(fileContents):
     checkEmptyMap(fileContents)
-    #for content in fileContents:
-     #   if content[0:2] == "<<" and content[-1:] == ">>":
-      #      print(" -- -- ")
+    for content in fileContents:
+        if content == "<":
+            sys.stdout.write(" -- -- ")
+
 
 def checkEmptyMap(fileContents):
     if fileContents == "<<>>":

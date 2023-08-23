@@ -4,9 +4,11 @@ Created on August 20, 2023
 @author: Arpan Srivastava
 '''
 
+import sys
+sys.path.append('.\Project1A')
 import unittest
 import subprocess
-#import nosjParser as njp
+import Parser.nosjParser as njp
 
 #   Analysis: Project1A.nosjParser
 #        inputs:
@@ -16,7 +18,7 @@ import subprocess
 #
 #            nominal: 
 #                     deserealize the input file and print the description to standard output (stdout). 
-#                     The description should be formatted as follows: "key—name -- type -- value" 
+#                     The description should be formatted as follows: "key-name -- type -- value" 
 #                     (no trailing or leading spaces other than trailing newline).
 #                     If the object is a map, In the case that a map is encountered, your implementation MUST leave 
 #                     the value field of the above line empty and output a stand-alone line of "begin-map".
@@ -28,6 +30,7 @@ import subprocess
 #
 #   happy path tests:
 #                100: valid file with an empty map. print " -- -- " to stdout
+#                101: valid file with a nosj num object in a map. print "key-name -- type -- 0.0" to stdout
 #                
 #
 #    sad path tests:
@@ -49,6 +52,13 @@ class nosjParserTest(unittest.TestCase):
     def test100_emptyMap(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest100.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(result.stdout.decode('utf-8'), ' -- -- \r\n')
+
+    def test101_basicNumObject(self):
+        #exceptedResult = sys.stdout.write("key-name -- type -- 0.0\n")
+        #actualResult = njp.readFile('<<abc:f0.0f>>')
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest101.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.stdout.decode('utf-8'), 'key-name -- type -- 0.0\r\n')
+        #self.assertEqual(actualResult, exceptedResult)
 
 
 if __name__ == "__main__":
