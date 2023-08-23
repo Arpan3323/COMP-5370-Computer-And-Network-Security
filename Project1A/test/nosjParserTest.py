@@ -27,6 +27,7 @@ import subprocess
 #                     a status code of 66. The error message must begin with the string "ERROR -- " (and end with a single trailing newline).
 #
 #   happy path tests:
+#                100: valid file with an empty map. print " -- -- " to stdout
 #                
 #
 #    sad path tests:
@@ -40,10 +41,15 @@ class nosjParserTest(unittest.TestCase):
     
     def test901_invalidFile(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'nosjParserTest901.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print("STDOUT:", result.stdout.decode('utf-8'))
-        print("STDERR:", result.stderr.decode('utf-8'))
+        #print("STDOUT:", result.stdout.decode('utf-8'))
+        #print("STDERR:", result.stderr.decode('utf-8'))
         self.assertEqual(result.returncode, 66)
         self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Invalid file name. Please re-check the file name and try again.\r\n')
+
+    def test100_emptyMap(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest100.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.stdout.decode('utf-8'), ' -- -- \r\n')
+
 
 if __name__ == "__main__":
     unittest.main()
