@@ -37,6 +37,7 @@ import Parser.nosjParser as njp
 #                     optional ascii-dash representing a negative-sign ("-"), one or more
 #                     ascii-digits ("0" through "9"), a decimal point, one or more ascii-digits ("0"
 #                     through "9"), and the ascii-character "f"
+#                104: unpack num and return the key and value
 #
 #    sad path tests:
 #                901: file not found. print "ERROR -- Invalid file name. Please re-check the file name and try again." to stderr and exit with status code 66
@@ -72,6 +73,22 @@ class nosjParserTest(unittest.TestCase):
     def test102_0_invalidKey(self):
         actualResult = njp.validateKey('ABC')
         self.assertEqual(actualResult, False)
+
+    def test103_validNum(self):
+        actualResult = njp.validateNum('f0.0f')
+        self.assertEqual(actualResult, True)
+
+    def test103_0_invalidNum(self):
+        actualResult = njp.validateNum('f0.0')
+        self.assertEqual(actualResult, False)
+    
+    def test103_1_invalidNum(self):
+        actualResult = njp.validateNum('f0.0f0')
+        self.assertEqual(actualResult, False)
+
+    def test104_unpackNumAndReturnKeyAndValue(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest104.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.stdout.decode('utf-8'), 'ab -- num -- -5678.0\r\n')
     
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')

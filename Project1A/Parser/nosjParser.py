@@ -8,15 +8,25 @@ import re
 
 def readFile(fileContents):
     key, value = unpackObject(fileContents)
-    
-    sys.stdout.write(key + " -- type -- " + value + "\n")
+    if validateKey(key):
+        if validateNum(value):
+            parsedNum = unpackNum(value)
+            sys.stdout.write(f"{key} -- num -- {parsedNum}" + "\n")
+        '''else:
+            sys.stdout.write("begin-map\n")
+            readFile(value)
+            sys.stdout.write("end-map\n")'''
 
 def validateKey(key):
     pattern = r'^[a-z]+$'
-    if re.match(pattern, key):
-        return True
-    else:
-        return False
+    return bool(re.match(pattern, key))
+
+def validateNum(num):
+    pattern = r'^f-?[0-9]+\.[0-9]+f$'
+    return bool(re.match(pattern, num))
+    
+def unpackNum(num):
+    return num.replace('f', '')
 
 def unpackObject(fileContents):
     keys = []
@@ -38,7 +48,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
        error.write("ERROR -- Invalid number of arguments\n")
        exit(66)
-    
+
     fileToRead = sys.argv[1]
 
     try:
@@ -48,6 +58,6 @@ if __name__ == "__main__":
             sys.stdout.write(" -- -- \n")
         else:
             readFile(fileContents)
-    except:
+    except Exception:
         error.write("ERROR -- Invalid file name. Please re-check the file name and try again.\n")
         exit(66)
