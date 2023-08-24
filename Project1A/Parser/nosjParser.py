@@ -4,17 +4,32 @@ Created on August 20, 2023
 @author: Arpan Srivastava
 '''
 import sys
+import re
 
 def readFile(fileContents):
-    checkEmptyMap(fileContents)
-    for content in fileContents:
-        if content == "<":
-            sys.stdout.write(" -- -- ")
+    key, value = unpackObject(fileContents)
+    
+    sys.stdout.write(key + " -- type -- " + value + "\n")
+
+def validateKey(key):
+    pattern = r'^[a-z]+$'
+    if re.match(pattern, key):
+        return True
+    else:
+        return False
+
+def unpackObject(fileContents):
+    keys = []
+    values = []
+    removeTopMapPattern = r'^<<(.*)>>$'
+    removedTopMap = re.sub(removeTopMapPattern, r'\1', fileContents)
+    keyValuePairs = removedTopMap.split(':', 1)
+    return keyValuePairs[0], keyValuePairs[1]
 
 
 def checkEmptyMap(fileContents):
     if fileContents == "<<>>":
-        sys.stdout.write(" -- -- \n")
+        return True
         
 if __name__ == "__main__":
     error = sys.stderr
@@ -29,7 +44,10 @@ if __name__ == "__main__":
     try:
         file = open(fileToRead, "r")
         fileContents = file.read()
-        readFile(fileContents)
+        if fileContents == "<<>>":
+            sys.stdout.write(" -- -- \n")
+        else:
+            readFile(fileContents)
     except:
         error.write("ERROR -- Invalid file name. Please re-check the file name and try again.\n")
         exit(66)

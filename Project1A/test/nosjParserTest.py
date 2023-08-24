@@ -31,7 +31,12 @@ import Parser.nosjParser as njp
 #   happy path tests:
 #                100: valid file with an empty map. print " -- -- " to stdout
 #                101: valid file with a nosj num object in a map. print "key-name -- type -- 0.0" to stdout
-#                
+#                102: return true if the key is valid. map keys MUST be an ascii-string 
+#                     consisting of one or more lowercase letters ("a" through "z") only
+#                103: determine if the value is a num. num consists of the ascii-character "f", an
+#                     optional ascii-dash representing a negative-sign ("-"), one or more
+#                     ascii-digits ("0" through "9"), a decimal point, one or more ascii-digits ("0"
+#                     through "9"), and the ascii-character "f"
 #
 #    sad path tests:
 #                901: file not found. print "ERROR -- Invalid file name. Please re-check the file name and try again." to stderr and exit with status code 66
@@ -57,8 +62,24 @@ class nosjParserTest(unittest.TestCase):
         #exceptedResult = sys.stdout.write("key-name -- type -- 0.0\n")
         #actualResult = njp.readFile('<<abc:f0.0f>>')
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest101.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.assertEqual(result.stdout.decode('utf-8'), 'key-name -- type -- 0.0\r\n')
+        self.assertEqual(result.stdout.decode('utf-8'), 'abc -- type -- f0.0f\r\n')
         #self.assertEqual(actualResult, exceptedResult)
+    
+    def test102_validKey(self):
+        actualResult = njp.validateKey('abc')
+        self.assertEqual(actualResult, True)
+
+    def test102_0_invalidKey(self):
+        actualResult = njp.validateKey('ABC')
+        self.assertEqual(actualResult, False)
+    
+    def test000_randomTest(self):
+        actualResult = njp.unpackObject('<<abc:f0.0f>>')
+        self.assertEqual(actualResult, ('abc','f0.0f'))
+
+    def test001_randomTest(self):
+        actualResult = njp.unpackObject('<<abc:<<a:f0.0f>>>>')
+        self.assertEqual(actualResult, ('abc','<<a:f0.0f>>'))
 
 
 if __name__ == "__main__":
