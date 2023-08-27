@@ -45,6 +45,13 @@ import Parser.nosjParser as njp
 #                     restricted set of bytes, complex-strings can encode arbitrary bytes but the marshalled-form MUST include
 #                     at least one (1) percent-encoded byte (sometimes called "URL-encoding")
 #                108: unpack complex-string and return the key and value
+#                109: determine if the value is a map. A map is a sequence of zero or more key-value pairs, A nosj map MUST start with a two left angle-bracket ("<<") and end
+#                     with two right angle-bracket (">>") and map keys MUST be an ascii-string
+#                     consisting of one or more lowercase letters ("a" through "z") only. Map values
+#                     may be any of the three canonical nosj data-types (map, string or num) and
+#                     there is no specification-bound on how many maps may be nested within each
+#                     other. Though map values are not required to be unique, map keys MUST be unique
+#                     within the current map (though they may be duplicated in maps at other levels of "nesting")
 #
 #    sad path tests:
 #                901: file not found. print "ERROR -- Invalid file name. Please re-check the file name and try again." to stderr and exit with status code 66
@@ -64,13 +71,13 @@ class nosjParserTest(unittest.TestCase):
 
     def test100_emptyMap(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest100.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.assertEqual(result.stdout.decode('utf-8'), ' -- -- \r\n')
+        self.assertEqual(result.stdout.decode('utf-8'), 'begin-map\r\n -- -- \r\nend-map\r\n')
 
     def test101_basicNumObject(self):
         #exceptedResult = sys.stdout.write("key-name -- type -- 0.0\n")
         #actualResult = njp.readFile('<<abc:f0.0f>>')
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest101.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.assertEqual(result.stdout.decode('utf-8'), 'abc -- type -- f0.0f\r\n')
+        self.assertEqual(result.stdout.decode('utf-8'), 'begin-map\r\nabc -- num -- 0.0\r\nend-map\r\n')
         #self.assertEqual(actualResult, exceptedResult)
     
     def test102_validKey(self):
@@ -95,7 +102,7 @@ class nosjParserTest(unittest.TestCase):
 
     def test104_unpackNumAndReturnKeyAndValue(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest104.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.assertEqual(result.stdout.decode('utf-8'), 'ab -- num -- -5678.0\r\n')
+        self.assertEqual(result.stdout.decode('utf-8'), 'begin-map\r\nab -- num -- -5678.0\r\nend-map\r\n')
 
     def test105_validSimpleString(self):
         actualResult = njp.validateSimpleString('ef ghs')
@@ -103,7 +110,7 @@ class nosjParserTest(unittest.TestCase):
 
     def test106_unpackSimpleStringAndReturnKeyAndValue(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest106.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.assertEqual(result.stdout.decode('utf-8'), 'x -- string -- abcd\r\n')
+        self.assertEqual(result.stdout.decode('utf-8'), 'begin-map\r\nx -- string -- abcd\r\nend-map\r\n')
     
     def test107_validateComplexString(self):
         actualResult = njp.validateComplexString('ab%2C%00cd')
@@ -111,15 +118,30 @@ class nosjParserTest(unittest.TestCase):
 
     def test108_unpackComplexStringAndReturnKeyAndValue(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest108.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        self.assertEqual(result.stdout.decode('utf-8'), 'x -- string -- ab,cd\r\n')
+        self.assertEqual(result.stdout.decode('utf-8'), 'begin-map\r\nx -- string -- ab,cd\r\nend-map\r\n')
+
+    def test109_validMap(self):
+        actualResult = njp.validateMap('<<x:<<y:f1.23f>>>>')
+        self.assertEqual(actualResult, True)
+
+    def test110_unpackMapAndReturnKeyAndValueWhenTopLevelMapHasNestedMap(self):
+        exceptedResult = 'x' , '<<y:f1.23f>>'
+        actualResult = njp.unpackObject('<<x:<<y:f1.23f>>>>')
+        self.assertEqual(actualResult, exceptedResult)
+    
+    def test111_readFileWhenTopLevelMapHasNestedMap(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest111.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.stdout.decode('utf-8'), 'begin-map\r\nx -- map --\r\nbegin-map\r\ny -- num -- 1.23\r\nend-map\r\nend-map\r\n')
         
+    
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')
         self.assertEqual(actualResult, ('abc','f0.0f'))
 
     def test001_randomTest(self):
-        actualResult = njp.unpackObject('<<abc:<<a:f0.0f>>>>')
-        self.assertEqual(actualResult, ('abc','<<a:f0.0f>>'))
+        #actualResult = njp.unpackObject('<<abc:<<a:f0.0f>>>>')
+        #self.assertEqual(actualResult, ('abc','<<a:f0.0f>>'))
+        actualResult = njp.validateComplexString('<<abc:<<a:f0.0f>>')
 
 
 if __name__ == "__main__":

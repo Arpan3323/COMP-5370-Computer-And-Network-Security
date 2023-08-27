@@ -19,7 +19,12 @@ def readFile(fileContents):
             sys.stdout.write(f"{key} -- string -- {parsedString}" + "\n")
         elif validateComplexString(value):
             parsedString = unpackComplexString(value)
-            sys.stdout.write(f"{key} -- string -- {parsedString}" + "\n")
+            sys.stdout.write(f"{key} -- string2 -- {parsedString}" + "\n")
+        elif validateMap(value):
+            #sys.stdout.write(f"begin-map\n")
+            sys.stdout.write(f"{key} -- map -- " + "\n")
+            #sys.stdout.write(f"end-map\n")
+            readFile(value)
         sys.stdout.write("end-map\n")
         '''else:
             sys.stdout.write("begin-map\n")
@@ -47,24 +52,29 @@ def unpackSimpleString(simpleString):
 def validateComplexString(complexString):
     pattern = r'%[0-9A-F]{2}'
     searchIndexes = []
-    for i in range(len(complexString)):
-        if complexString[i:i+1] == '%':
-            searchIndexes.append(i)
-    
-    for index in searchIndexes:
-        if index + 3 > len(complexString):
-            return False  # Not enough characters left for valid encoding
+    if '%' in complexString:
+        for i in range(len(complexString)):
+            if complexString[i:i+1] == '%':
+                searchIndexes.append(i)
         
-        match = re.match(pattern, complexString[index:index+3])
-        if not match:
-            return False  # Invalid percent encoding found
-    
-    return True  # All percent encodings are valid
+        for index in searchIndexes:
+            if index + 3 > len(complexString):
+                return False  # Not enough characters left for valid encoding
+            
+            match = re.match(pattern, complexString[index:index+3])
+            if not match:
+                return False  # Invalid percent encoding found
+        
+        return True  # All percent encodings are valid
 
 def unpackComplexString(complexString):
     return urllib.parse.unquote(complexString)
     #pattern = r'%[0-9A-Fa-f]{2}'
     #return bool(re.search(pattern, complexString))
+
+def validateMap(map):
+    pattern = r'^<<[a-z]+:.*>>$'
+    return bool(re.match(pattern, map))
 
 
 
