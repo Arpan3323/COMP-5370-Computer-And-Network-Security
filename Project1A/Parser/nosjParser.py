@@ -5,13 +5,22 @@ Created on August 20, 2023
 '''
 import sys
 import re
+import urllib.parse
 
 def readFile(fileContents):
     key, value = unpackObject(fileContents)
     if validateKey(key):
+        sys.stdout.write("begin-map\n")
         if validateNum(value):
             parsedNum = unpackNum(value)
             sys.stdout.write(f"{key} -- num -- {parsedNum}" + "\n")
+        elif validateSimpleString(value):
+            parsedString = unpackSimpleString(value)
+            sys.stdout.write(f"{key} -- string -- {parsedString}" + "\n")
+        elif validateComplexString(value):
+            parsedString = unpackComplexString(value)
+            sys.stdout.write(f"{key} -- string -- {parsedString}" + "\n")
+        sys.stdout.write("end-map\n")
         '''else:
             sys.stdout.write("begin-map\n")
             readFile(value)
@@ -27,6 +36,37 @@ def validateNum(num):
     
 def unpackNum(num):
     return num.replace('f', '')
+
+def validateSimpleString(simpleString):
+    pattern = r'^[a-zA-Z0-9\s\t]+s$'
+    return bool(re.match(pattern, simpleString))
+
+def unpackSimpleString(simpleString):
+    return simpleString.replace('s', '')
+
+def validateComplexString(complexString):
+    pattern = r'%[0-9A-F]{2}'
+    searchIndexes = []
+    for i in range(len(complexString)):
+        if complexString[i:i+1] == '%':
+            searchIndexes.append(i)
+    
+    for index in searchIndexes:
+        if index + 3 > len(complexString):
+            return False  # Not enough characters left for valid encoding
+        
+        match = re.match(pattern, complexString[index:index+3])
+        if not match:
+            return False  # Invalid percent encoding found
+    
+    return True  # All percent encodings are valid
+
+def unpackComplexString(complexString):
+    return urllib.parse.unquote(complexString)
+    #pattern = r'%[0-9A-Fa-f]{2}'
+    #return bool(re.search(pattern, complexString))
+
+
 
 def unpackObject(fileContents):
     keys = []
@@ -55,9 +95,11 @@ if __name__ == "__main__":
         file = open(fileToRead, "r")
         fileContents = file.read()
         if fileContents == "<<>>":
+            sys.stdout.write("begin-map\n")
             sys.stdout.write(" -- -- \n")
+            sys.stdout.write("end-map\n")
         else:
             readFile(fileContents)
-    except Exception:
-        error.write("ERROR -- Invalid file name. Please re-check the file name and try again.\n")
+    except Exception as e:
+        error.write(f"ERROR -- Invalid file name. Please re-check the file name and try again. -- {e}\n")
         exit(66)

@@ -38,6 +38,13 @@ import Parser.nosjParser as njp
 #                     ascii-digits ("0" through "9"), a decimal point, one or more ascii-digits ("0"
 #                     through "9"), and the ascii-character "f"
 #                104: unpack num and return the key and value
+#                105: determine if the value is a simple-string. all ascii letters and numbers, 
+#                     spaces (" " / 0x20), and tabs ("\t", 0x09)). Simple-strings are followed by a trailing "s"
+#                106: unpack simple-string and return the key and value
+#                107: determine if the value is a complex-string. Where as simple-string may only contain a 
+#                     restricted set of bytes, complex-strings can encode arbitrary bytes but the marshalled-form MUST include
+#                     at least one (1) percent-encoded byte (sometimes called "URL-encoding")
+#                108: unpack complex-string and return the key and value
 #
 #    sad path tests:
 #                901: file not found. print "ERROR -- Invalid file name. Please re-check the file name and try again." to stderr and exit with status code 66
@@ -89,7 +96,23 @@ class nosjParserTest(unittest.TestCase):
     def test104_unpackNumAndReturnKeyAndValue(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest104.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(result.stdout.decode('utf-8'), 'ab -- num -- -5678.0\r\n')
+
+    def test105_validSimpleString(self):
+        actualResult = njp.validateSimpleString('ef ghs')
+        self.assertEqual(actualResult, True)
+
+    def test106_unpackSimpleStringAndReturnKeyAndValue(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest106.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.stdout.decode('utf-8'), 'x -- string -- abcd\r\n')
     
+    def test107_validateComplexString(self):
+        actualResult = njp.validateComplexString('ab%2C%00cd')
+        self.assertEqual(actualResult, True)
+
+    def test108_unpackComplexStringAndReturnKeyAndValue(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest108.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.stdout.decode('utf-8'), 'x -- string -- ab,cd\r\n')
+        
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')
         self.assertEqual(actualResult, ('abc','f0.0f'))
