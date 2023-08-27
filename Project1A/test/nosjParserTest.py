@@ -52,6 +52,8 @@ import Parser.nosjParser as njp
 #                     there is no specification-bound on how many maps may be nested within each
 #                     other. Though map values are not required to be unique, map keys MUST be unique
 #                     within the current map (though they may be duplicated in maps at other levels of "nesting")
+#                111: unpack map and return the key and value when top level map has nested map
+#                112: unpack nosj object with multiple key-value pairs
 #
 #    sad path tests:
 #                901: file not found. print "ERROR -- Invalid file name. Please re-check the file name and try again." to stderr and exit with status code 66
@@ -133,6 +135,10 @@ class nosjParserTest(unittest.TestCase):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest111.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(result.stdout.decode('utf-8'), 'begin-map\r\nx -- map --\r\nbegin-map\r\ny -- num -- 1.23\r\nend-map\r\nend-map\r\n')
         
+    def test112_unpackNosjObjectWithMultipleKeyAndValuePairs(self):
+        actualResult = njp.unpackObject('<<abc:f0.0f,def:t ars>>')
+        expectedResult = {'abc':'f0.0f', 'def':'t ars'}
+        self.assertEqual(actualResult, expectedResult)
     
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')

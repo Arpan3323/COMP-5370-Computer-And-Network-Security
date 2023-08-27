@@ -8,23 +8,25 @@ import re
 import urllib.parse
 
 def readFile(fileContents):
-    key, value = unpackObject(fileContents)
-    if validateKey(key):
-        sys.stdout.write("begin-map\n")
-        if validateNum(value):
-            parsedNum = unpackNum(value)
-            sys.stdout.write(f"{key} -- num -- {parsedNum}" + "\n")
-        elif validateSimpleString(value):
-            parsedString = unpackSimpleString(value)
-            sys.stdout.write(f"{key} -- string -- {parsedString}" + "\n")
-        elif validateComplexString(value):
-            parsedString = unpackComplexString(value)
-            sys.stdout.write(f"{key} -- string2 -- {parsedString}" + "\n")
-        elif validateMap(value):
-            #sys.stdout.write(f"begin-map\n")
-            sys.stdout.write(f"{key} -- map -- " + "\n")
-            #sys.stdout.write(f"end-map\n")
-            readFile(value)
+    #key, value = unpackObject(fileContents)
+    for key, value in unpackObject(fileContents).items():
+        if validateKey(key):
+            sys.stdout.write("begin-map\n")
+            if validateMap(value):
+                #sys.stdout.write(f"begin-map\n")
+                sys.stdout.write(f"{key} -- map -- " + "\n")
+                #sys.stdout.write(f"end-map\n")
+                readFile(value)
+            elif validateNum(value):
+                parsedNum = unpackNum(value)
+                sys.stdout.write(f"{key} -- num -- {parsedNum}" + "\n")
+            elif validateSimpleString(value):
+                parsedString = unpackSimpleString(value)
+                sys.stdout.write(f"{key} -- string -- {parsedString}" + "\n")
+            elif validateComplexString(value):
+                parsedString = unpackComplexString(value)
+                sys.stdout.write(f"{key} -- string2 -- {parsedString}" + "\n")
+        
         sys.stdout.write("end-map\n")
         '''else:
             sys.stdout.write("begin-map\n")
@@ -81,8 +83,17 @@ def validateMap(map):
 def unpackObject(fileContents):
     keys = []
     values = []
+    contentDictionary = {}
     removeTopMapPattern = r'^<<(.*)>>$'
     removedTopMap = re.sub(removeTopMapPattern, r'\1', fileContents)
+    if ',' in removedTopMap:
+        keyValuePairs = removedTopMap.split(',')
+        for pair in keyValuePairs:
+            key, value = pair.split(':', 1)
+            contentDictionary[key] = value
+            #keys.append(key)
+            #values.append(value)
+        return contentDictionary
     keyValuePairs = removedTopMap.split(':', 1)
     return keyValuePairs[0], keyValuePairs[1]
 
