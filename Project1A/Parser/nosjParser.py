@@ -9,13 +9,13 @@ import urllib.parse
 
 def readFile(fileContents):
     #key, value = unpackObject(fileContents)
+    sys.stdout.write("begin-map\n")
     for key, value in unpackObject(fileContents).items():
-        if validateKey(key):
-            sys.stdout.write("begin-map\n")
+        if checkEmptyMap(key, value):
+            sys.stdout.write(" -- -- " + "\n")
+        elif validateKey(key):
             if validateMap(value):
-                #sys.stdout.write(f"begin-map\n")
                 sys.stdout.write(f"{key} -- map -- " + "\n")
-                #sys.stdout.write(f"end-map\n")
                 readFile(value)
             elif validateNum(value):
                 parsedNum = unpackNum(value)
@@ -26,12 +26,7 @@ def readFile(fileContents):
             elif validateComplexString(value):
                 parsedString = unpackComplexString(value)
                 sys.stdout.write(f"{key} -- string2 -- {parsedString}" + "\n")
-        
-        sys.stdout.write("end-map\n")
-        '''else:
-            sys.stdout.write("begin-map\n")
-            readFile(value)
-            sys.stdout.write("end-map\n")'''
+    sys.stdout.write("end-map\n")
 
 def validateKey(key):
     pattern = r'^[a-z]+$'
@@ -49,7 +44,16 @@ def validateSimpleString(simpleString):
     return bool(re.match(pattern, simpleString))
 
 def unpackSimpleString(simpleString):
-    return simpleString.replace('s', '')
+    return simpleString.replace('s', '', 1)
+
+def unpackComplexString(complexString):
+    return urllib.parse.unquote(complexString)
+    #pattern = r'%[0-9A-Fa-f]{2}'
+    #return bool(re.search(pattern, complexString))
+
+def validateMap(map):
+    pattern = r'^<<[a-z]+:.*>>$'
+    return bool(re.match(pattern, map))
 
 def validateComplexString(complexString):
     pattern = r'%[0-9A-F]{2}'
@@ -69,23 +73,16 @@ def validateComplexString(complexString):
         
         return True  # All percent encodings are valid
 
-def unpackComplexString(complexString):
-    return urllib.parse.unquote(complexString)
-    #pattern = r'%[0-9A-Fa-f]{2}'
-    #return bool(re.search(pattern, complexString))
-
-def validateMap(map):
-    pattern = r'^<<[a-z]+:.*>>$'
-    return bool(re.match(pattern, map))
 
 
 
 def unpackObject(fileContents):
-    keys = []
-    values = []
+    if not validateMap:
+        return
+    #keys = []
+    #values = []
     contentDictionary = {}
-    removeTopMapPattern = r'^<<(.*)>>$'
-    removedTopMap = re.sub(removeTopMapPattern, r'\1', fileContents)
+    removedTopMap = re.sub(r'^<<(.*)>>$', r'\1', fileContents)
     if ',' in removedTopMap:
         keyValuePairs = removedTopMap.split(',')
         for pair in keyValuePairs:
@@ -94,12 +91,17 @@ def unpackObject(fileContents):
             #keys.append(key)
             #values.append(value)
         return contentDictionary
-    keyValuePairs = removedTopMap.split(':', 1)
-    return keyValuePairs[0], keyValuePairs[1]
+    if removedTopMap == "":
+        contentDictionary[""] = removedTopMap
+    else:
+        keyValuePairs = removedTopMap.split(':', 1)
+        contentDictionary[keyValuePairs[0]] = keyValuePairs[1]
+    return contentDictionary
+        #return keyValuePairs[0], keyValuePairs[1]
 
 
-def checkEmptyMap(fileContents):
-    if fileContents == "<<>>":
+def checkEmptyMap(key, value):
+    if key == "" and value == "":
         return True
         
 if __name__ == "__main__":
@@ -115,12 +117,8 @@ if __name__ == "__main__":
     try:
         file = open(fileToRead, "r")
         fileContents = file.read()
-        if fileContents == "<<>>":
-            sys.stdout.write("begin-map\n")
-            sys.stdout.write(" -- -- \n")
-            sys.stdout.write("end-map\n")
-        else:
-            readFile(fileContents)
+        
+        readFile(fileContents)
     except Exception as e:
         error.write(f"ERROR -- Invalid file name. Please re-check the file name and try again. -- {e}\n")
         exit(66)

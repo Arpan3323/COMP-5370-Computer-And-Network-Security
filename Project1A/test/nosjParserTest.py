@@ -54,9 +54,12 @@ import Parser.nosjParser as njp
 #                     within the current map (though they may be duplicated in maps at other levels of "nesting")
 #                111: unpack map and return the key and value when top level map has nested map
 #                112: unpack nosj object with multiple key-value pairs
+#                113: unpack nosj object with multiple key-value pairs and nested map
 #
 #    sad path tests:
 #                901: file not found. print "ERROR -- Invalid file name. Please re-check the file name and try again." to stderr and exit with status code 66
+#                902: Catch map with duplicate keys. print "ERROR -- Duplicate key" to stderr and exit with status code 66
+
 #
 #    evil path test:
 #                none
@@ -127,7 +130,7 @@ class nosjParserTest(unittest.TestCase):
         self.assertEqual(actualResult, True)
 
     def test110_unpackMapAndReturnKeyAndValueWhenTopLevelMapHasNestedMap(self):
-        exceptedResult = 'x' , '<<y:f1.23f>>'
+        exceptedResult = {'x': '<<y:f1.23f>>'}
         actualResult = njp.unpackObject('<<x:<<y:f1.23f>>>>')
         self.assertEqual(actualResult, exceptedResult)
     
@@ -139,9 +142,20 @@ class nosjParserTest(unittest.TestCase):
         actualResult = njp.unpackObject('<<abc:f0.0f,def:t ars>>')
         expectedResult = {'abc':'f0.0f', 'def':'t ars'}
         self.assertEqual(actualResult, expectedResult)
+
+    def test113_unpackNosjObjectWithMultipleKeyAndValuePairsAndNestedMap(self):
+        actualResult = njp.unpackObject('<<abc:f0.0f,def:t ars,ghi:<<jkl:f0.0f>>>>')
+        expectedResult = {'abc':'f0.0f', 'def':'t ars', 'ghi':'<<jkl:f0.0f>>'}
+        self.assertEqual(actualResult, expectedResult)
+
+    def test902_duplicateKey(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest902.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.returncode, 66)
+        self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Duplicate key\r\n')
     
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')
+        #actualResult2 = njp.readFile('<<>>')
         self.assertEqual(actualResult, ('abc','f0.0f'))
 
     def test001_randomTest(self):
