@@ -59,6 +59,7 @@ import Parser.nosjParser as njp
 #    sad path tests:
 #                901: file not found. print "ERROR -- Invalid file name. Please re-check the file name and try again." to stderr and exit with status code 66
 #                902: Catch map with duplicate keys. print "ERROR -- Duplicate key" to stderr and exit with status code 66
+#                903: Catch invalid nested map. print "ERROR -- Invalid nested map" to stderr and exit with status code 66
 
 #
 #    evil path test:
@@ -155,7 +156,8 @@ class nosjParserTest(unittest.TestCase):
     
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')
-        #actualResult2 = njp.readFile('<<>>')
+        actualResult2 = njp.readFile('<<x:<<y:<<z:ef%2Aghs>>>>>>')
+
         self.assertEqual(actualResult, ('abc','f0.0f'))
 
     def test001_randomTest(self):
