@@ -25,6 +25,5 @@ if __name__ == "__main__":
             print(line)
 ```
 
-### Output
-
-Link: [This video](https://www.youtube.com/watch?v=iiADhChRriM)
+### Questions 
+- What should be printed if an empty map is encountered? Should it be begin-map\n -- --\n end-map\n or begin-map\n end-map\n

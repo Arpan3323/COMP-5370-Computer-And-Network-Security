@@ -154,9 +154,14 @@ class nosjParserTest(unittest.TestCase):
         self.assertEqual(result.returncode, 66)
         self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Duplicate key\r\n')
     
+    def test903_invalidNestedMap(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest903.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.returncode, 66)
+        self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Invalid value found: <<a:09s>\r\n')
+
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')
-        actualResult2 = njp.readFile('<<x:<<y:<<z:ef%2Aghs>>>>>>')
+        actualResult2 = njp.readFile('<<>')
 
         self.assertEqual(actualResult, ('abc','f0.0f'))
 

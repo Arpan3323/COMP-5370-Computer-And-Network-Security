@@ -34,6 +34,9 @@ def readFile(fileContents):
                 parsedString = unpackComplexString(value)
                 writeToStdout += f"{key} -- string2 -- {parsedString}" + "\n"
                 #sys.stdout.write(f"{key} -- string2 -- {parsedString}" + "\n")
+            else:
+                error.write(f"ERROR -- Invalid value found: {value}\n")
+                exit(66)
     #sys.stdout.write("end-map\n")
     writeToStdout += "end-map\n"
     return writeToStdout
@@ -68,7 +71,7 @@ def unpackComplexString(complexString):
     #return bool(re.search(pattern, complexString))
 
 def validateMap(map):
-    pattern = r'^<<[a-z]+:.*>>$'
+    pattern = r'^<<.*>>$'
     return bool(re.match(pattern, map))
 
 def validateComplexString(complexString):
@@ -93,8 +96,9 @@ def validateComplexString(complexString):
 
 
 def unpackObject(fileContents):
-    if not validateMap:
-        return
+    if not validateMap(fileContents):
+        error.write(f"ERROR -- Invalid value found: {fileContents}\n")
+        exit(66)
     contentDictionary = {}
     removedTopMap = re.sub(r'^<<(.*)>>$', r'\1', fileContents)
     if ',' in removedTopMap:
