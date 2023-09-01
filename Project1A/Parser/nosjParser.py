@@ -14,7 +14,7 @@ def readFile(fileContents):
     #sys.stdout.write("begin-map\n")
     for key, value in unpackObject(fileContents).items():
         if checkEmptyMap(key, value):
-            writeToStdout += " -- -- " + "\n"
+            writeToStdout += "" + "\n"
             #sys.stdout.write(" -- -- " + "\n")
         elif validateKey(key):
             if validateMap(value):
@@ -35,8 +35,11 @@ def readFile(fileContents):
                 writeToStdout += f"{key} -- string2 -- {parsedString}" + "\n"
                 #sys.stdout.write(f"{key} -- string2 -- {parsedString}" + "\n")
             else:
-                error.write(f"ERROR -- Invalid value found: {value}\n")
+                error.write(f"ERROR -- Invalid data format with key: {key} and value: {value}\n")
                 exit(66)
+        else:
+            error.write(f"ERROR -- Invalid key found: {key}\n")
+            exit(66)
     #sys.stdout.write("end-map\n")
     writeToStdout += "end-map\n"
     return writeToStdout
@@ -56,7 +59,11 @@ def validateNum(num):
     return bool(re.match(pattern, num))
     
 def unpackNum(num):
-    return num.replace('f', '')
+    numWithoutFIdentifier = num.replace('f', '')
+    separateNumByDot = numWithoutFIdentifier.split('.')
+    if all(nums == '0' for nums in separateNumByDot[1]):
+        return separateNumByDot[0]
+    return numWithoutFIdentifier
 
 def validateSimpleString(simpleString):
     pattern = r'^[a-zA-Z0-9\s\t]+s$'
@@ -137,7 +144,7 @@ if __name__ == "__main__":
     try:
         file = open(fileToRead, "r")
         fileContents = file.read()
-        output.write(readFile(fileContents))
+        output.write(readFile(fileContents.strip()))
     except Exception as e:
         error.write(f"ERROR -- Invalid file name. Please re-check the file name and try again. -- {e}\n")
         exit(66)

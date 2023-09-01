@@ -55,13 +55,15 @@ import Parser.nosjParser as njp
 #                111: unpack map and return the key and value when top level map has nested map
 #                112: unpack nosj object with multiple key-value pairs
 #                113: unpack nosj object with multiple key-value pairs and nested map
+#                114: capture everything after the "." when a num is unpacked
 #
 #    sad path tests:
 #                901: file not found. print "ERROR -- Invalid file name. Please re-check the file name and try again." to stderr and exit with status code 66
 #                902: Catch map with duplicate keys. print "ERROR -- Duplicate key" to stderr and exit with status code 66
 #                903: Catch invalid nested map. print "ERROR -- Invalid nested map" to stderr and exit with status code 66
-
-#
+#                904: Catch multiple colons in a key-value pair. print "ERROR -- Invalid key-value pair" to stderr and exit with status code 66
+#                905: Catch invalid key. print "ERROR -- Invalid key" to stderr and exit with status code 66
+#                906: Catch file with multiple nosj objects. print "ERROR -- Invalid file" to stderr and exit with status code 66
 #    evil path test:
 #                none
 
@@ -152,16 +154,39 @@ class nosjParserTest(unittest.TestCase):
     def test902_duplicateKey(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest902.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(result.returncode, 66)
-        self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Duplicate key\r\n')
+        self.assertEqual(result.stderr.decode('ascii'), 'ERROR -- Duplicate key found: s\r\n')
     
     def test903_invalidNestedMap(self):
         result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest903.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.assertEqual(result.returncode, 66)
         self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Invalid value found: <<a:09s>\r\n')
 
+    def test904_invalidKeyValuePairs(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest904.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.returncode, 66)
+        self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Invalid data format with key: a and value: :abcs\r\n')
+    
+    def test905_invalidKey(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest905.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.returncode, 66)
+        self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Invalid key found: ABC\r\n')
+
+    def test906_invalidFile(self):
+        result = subprocess.run(['python', 'Project1A\Parser\\nosjParser.py', 'Project1A\inputs\\nosjParserTest906.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.returncode, 66)
+        self.assertEqual(result.stderr.decode('utf-8'), 'ERROR -- Invalid file format. Please re-check the file and try again.\r\n')
+
+    def test114_captureEverythingAfterTheDot(self):
+        actualResult = njp.unpackNum('f0.0001f')
+        self.assertEqual(actualResult, '0001')
+
+    def test115_removeDotAndEverythingAfterIfItAllZeroes(self):
+        actualResult = njp.unpackNum('f55.0000f')
+        self.assertEqual(actualResult,'55')
+
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')
-        actualResult2 = njp.readFile('<<>')
+        actualResult2 = njp.readFile('<<a:f0.2344f,b:<<a:09s>>>')
 
         self.assertEqual(actualResult, ('abc','f0.0f'))
 
