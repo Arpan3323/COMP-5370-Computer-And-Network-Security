@@ -95,16 +95,18 @@ def unpackObject(fileContents):
         contentDictionary[""] = removedTopMap
     else:
         keyValuePairs = removedTopMap.split(':', 1)
+        if len(keyValuePairs) != 2:
+            sys.stderr.write(f"ERROR -- Invalid value found: {removedTopMap}\n")
+            exit(66)
         contentDictionary[keyValuePairs[0]] = keyValuePairs[1]
     return contentDictionary
     
 def unpackCommaSeparatedPairs(removedTopMap):
     commaSeparatedContent = {}
-    split_pattern = r',(?![^<]*>>)'
-    keyValuePairs = re.split(split_pattern, removedTopMap)
+    keyValuePairs = splitCommasButPreserveMaps(removedTopMap)
     uniqueKeys = set()
     for pair in keyValuePairs:
-        if pair == "":
+        if pair == "" or len(pair) < 2:
             sys.stderr.write(f"ERROR -- Invalid value found: {pair}\n")
             exit(66)
         key, value = pair.split(':', 1)
@@ -114,6 +116,24 @@ def unpackCommaSeparatedPairs(removedTopMap):
         uniqueKeys.add(key)
         commaSeparatedContent[key] = value
     return commaSeparatedContent
+
+def splitCommasButPreserveMaps(text):
+    keyValuePairs = []
+    current = ''
+    stack = []
+    for char in text:
+        current += char
+        if char == ',' and not stack:
+            keyValuePairs.append(current.strip().replace(',', ''))
+            current = ''
+        if char == '<':
+            stack.append(char)
+        elif char == '>':
+            if stack:
+                stack.pop()
+    if current:
+        keyValuePairs.append(current.strip())
+    return keyValuePairs
 
 def checkEmptyMap(key, value):
     if key == "" and value == "":
