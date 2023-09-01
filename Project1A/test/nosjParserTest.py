@@ -186,7 +186,7 @@ class nosjParserTest(unittest.TestCase):
 
     def test000_randomTest(self):
         actualResult = njp.unpackObject('<<abc:f0.0f>>')
-        actualResult2 = njp.readFile('<<a:f0.2344f,b:<<a:09s>>>')
+        actualResult2 = njp.readFile('<<x:abcds,y:Arpans,goals:<<a:Insterstellar Travels,b:Unlocking314s,x:%3C%61%68%72%65%66%3E,c:<<h:<<>>>>>>>>')
 
         self.assertEqual(actualResult, ('abc','f0.0f'))
 
