@@ -70,7 +70,8 @@ def validateSimpleString(simpleString):
     return bool(re.match(pattern, simpleString))
 
 def unpackSimpleString(simpleString):
-    return simpleString.replace('s', '', 1)
+
+    return simpleString[:-1]
 
 def unpackComplexString(complexString):
     return urllib.parse.unquote(complexString)
@@ -88,16 +89,15 @@ def validateComplexString(complexString):
         for i in range(len(complexString)):
             if complexString[i:i+1] == '%':
                 searchIndexes.append(i)
-        
         for index in searchIndexes:
             if index + 3 > len(complexString):
-                return False  # Not enough characters left for valid encoding
+                return False
             
             match = re.match(pattern, complexString[index:index+3])
             if not match:
-                return False  # Invalid percent encoding found
+                return False
         
-        return True  # All percent encodings are valid
+        return True
 
 
 
