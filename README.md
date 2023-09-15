@@ -12,17 +12,14 @@ python3 nosjParser.py <filename>
 ### Python implementation
 
 ```python
-import sys
+def main():
+    if len(sys.argv) != 2:
+        print_error("Usage: python main.py input.nosj")
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Error: No file specified")
-
-    fileToRead = sys.argv[1]
-    print("Reading file: " + fileToRead)
-    with open(fileToRead, 'r') as file:
-        for line in file:
-            print(line)
+    input_file = sys.argv[1]
+    file = open(input_file, "r")
+    potentialNosjObject = file.read()
+    process_nosj(potentialNosjObject)
 ```
 
 ### Questions 

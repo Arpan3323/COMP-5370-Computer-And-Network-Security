@@ -1,3 +1,4 @@
+
 '''
 Created on August 20, 2023
 
@@ -96,7 +97,7 @@ def unpackObject(fileContents):
     else:
         keyValuePairs = removedTopMap.split(':', 1)
         if len(keyValuePairs) != 2:
-            sys.stderr.write(f"ERROR -- Invalid value found: {removedTopMap}\n")
+            sys.stderr.write(f"ERROR -- Invalid value map formatting found\n")
             exit(66)
         contentDictionary[keyValuePairs[0]] = keyValuePairs[1]
     return contentDictionary
@@ -150,7 +151,7 @@ def main():
         file = open(fileToRead, "r")
         fileContents = file.read()
     except Exception as e:
-        error.write(f"ERROR -- Invalid file. Please re-check the file and try again.\n")
+        error.write(f"ERROR -- Invalid file. Please re-check the file and try again.\n {e}\n")
         exit(66)
     output.write(readFile(fileContents.strip()))
         
