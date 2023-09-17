@@ -1,4 +1,4 @@
-
+#!/usr/bin/python3
 '''
 Created on August 20, 2023
 
@@ -151,7 +151,7 @@ def main():
         file = open(fileToRead, "r")
         fileContents = file.read()
     except Exception as e:
-        error.write(f"ERROR -- Invalid file. Please re-check the file and try again.\n {e}\n")
+        error.write(f"ERROR -- Invalid file. Please re-check the file and try again.\n")
         exit(66)
     output.write(readFile(fileContents.strip()))
         
