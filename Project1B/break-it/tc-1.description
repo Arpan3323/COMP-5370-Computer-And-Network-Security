@@ -1,1 +1,2 @@
-Considers a valid empty simple string as invalid when the input is <<a:s>>. 
+Considers a valid empty simple string as invalid when the input is <<a:s>>
+This is caused due to the regex that validates a simple string returns False as it expects the trailing "s" in the value to be 

@@ -55,7 +55,7 @@ def unpackNum(num):
     return numWithoutFIdentifier
 
 def validateSimpleString(simpleString):
-    pattern = r'^[a-zA-Z0-9\s\t]+s$'
+    pattern = r'^[a-zA-Z0-9\s\t]*s$'
     return bool(re.match(pattern, simpleString))
 
 def unpackSimpleString(simpleString):
