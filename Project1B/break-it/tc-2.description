@@ -1,0 +1,5 @@
+Parses an invalid nosj object and does not throw errors. Invalid object contains a comma followed by nothing and preceeded by a nosj data-type.
+
+This bug can be fixed by modifying the component "splitCommasButPreserveMaps". When the loop that iterates through the text and checks if the current 
+char is a comma, if it is, it should then check if this is also the last char in the text, i.e char == text[-1]. If it is, then it should throw an error 
+to stderr and exit the program. This will prevent the program from parsing invalid nosj objects.

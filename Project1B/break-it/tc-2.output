@@ -1,0 +1,4 @@
+begin-map
+a -- num -- 0.2344
+b -- string -- abc
+end-map

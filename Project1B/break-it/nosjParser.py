@@ -124,10 +124,14 @@ def splitCommasButPreserveMaps(text):
     current = ''
     stack = []
     for char in text:
-        current += char
+        if char != ',':
+            current += char
         if char == ',' and not stack:
-            keyValuePairs.append(current.strip().replace(',', ''))
+            keyValuePairs.append(current.strip().replace(",", ""))
             current = ''
+            if text[-1] == char:
+                sys.stderr.write(f"ERROR -- Invalid value found: {text}\n")
+                exit(66)
         if char == '<':
             stack.append(char)
         elif char == '>':

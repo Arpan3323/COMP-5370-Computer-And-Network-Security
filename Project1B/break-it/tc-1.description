@@ -1,2 +1,5 @@
-Considers a valid empty simple string as invalid when the input is <<a:s>>
-This is caused due to the regex that validates a simple string returns False as it expects the trailing "s" in the value to be 
+Considers a valid empty simple string as invalid when the input is <<a:s>>.
+
+This is caused due to the regex that validates a simple string returning False as it expects that trailing "s" in the value must be preceeded by 
+commonly-used ascii characters (i.e. all ascii letters and numbers, spaces ("" / 0x20), and tabs ("\t", 0x09)). The way to fix this is by changing 
+the regex to "[ASCII-Characters]*s" from "[ASCII-Characters]+s" as "+" means one or more and "*" means zero or more

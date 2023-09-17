@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
     def test001_randomTest(self):
         #actualResult = njp.unpackObject('<<abc:<<a:f0.0f>>>>')
         #self.assertEqual(actualResult, ('abc','<<a:f0.0f>>'))
-        actualResult = njp.readFile('<<a:s>>')
+        actualResult = njp.readFile('<<a:f0.2344f,>>')
 
 if __name__ == '__main__':
     unittest.main()
