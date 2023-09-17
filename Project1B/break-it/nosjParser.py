@@ -4,6 +4,7 @@ Created on August 20, 2023
 
 @author: Arpan Srivastava
 '''
+import subprocess
 import sys
 import re
 import urllib.parse
@@ -58,7 +59,7 @@ def validateSimpleString(simpleString):
     return bool(re.match(pattern, simpleString))
 
 def unpackSimpleString(simpleString):
-    return simpleString[:-1]
+    return "" if simpleString == "s" else simpleString[:-1]
 
 def unpackComplexString(complexString):
     return urllib.parse.unquote(complexString)
@@ -153,8 +154,10 @@ def main():
     except Exception as e:
         error.write(f"ERROR -- Invalid file. Please re-check the file and try again.\n")
         exit(66)
+    
+    #outputFile = open("tc-1.output", "w")
+    #outputFile.write(readFile(fileContents.strip()))
     output.write(readFile(fileContents.strip()))
         
 if __name__ == "__main__":
     main()
-    
