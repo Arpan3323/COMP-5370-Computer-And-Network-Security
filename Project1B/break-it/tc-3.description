@@ -1,0 +1,7 @@
+Parses an invalid nosj-object and does not throw errors. The invalid object contains an invalid complex-string containing non-precent-encoded 
+angle brackets. The root cause is component "validateComplexString" only checking for the correctness of percent encodings, but not checking for 
+anything else that can lead to invalid complex-string
+
+Can be fixed by adding a check in the beginning of the component "validateComplexString" to check for the presence of non-precent-encoded
+that are not allowed in complex-strings. This can be hard-coded (if complexString.count("<") > 0 or ...) but it would be better to use a regex to check 
+for the presence of invalid characters.

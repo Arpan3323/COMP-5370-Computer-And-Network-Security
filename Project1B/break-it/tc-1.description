@@ -1,4 +1,5 @@
-Considers a valid empty simple string as invalid when the input is <<a:s>>.
+Considers a valid empty simple string as invalid when the input is <<a:s>>. The root cause is the regex defined in the component "validateSimpleString" 
+is incorrect.
 
 This is caused due to the regex that validates a simple string returning False as it expects that trailing "s" in the value must be preceeded by 
 commonly-used ascii characters (i.e. all ascii letters and numbers, spaces ("" / 0x20), and tabs ("\t", 0x09)). The way to fix this is by changing 
