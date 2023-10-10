@@ -1,0 +1,3 @@
+Email address used to make cookie: azs0239@auburn.edu
+
+Build description: used python3 to create scripts with no shebang line at top. Using the "command used for grading" from the assignment instruction pdf will execute the scripts against targets.
